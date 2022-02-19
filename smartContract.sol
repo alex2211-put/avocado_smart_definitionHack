@@ -1,4 +1,4 @@
- // SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.0;
 
@@ -155,6 +155,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
     }
 
     function addAdvSpace(uint basePriceAdv, uint durationInSeconds, string calldata domain, uint height, uint width, string calldata description) external {
+        _mintSingleNFT();
         advertisingSpace memory oneSpace = advertisingSpace(
             {
                 price: basePriceAdv, 
