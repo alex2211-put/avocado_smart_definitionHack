@@ -98,7 +98,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
     }
 
     function buyAdvertisementSpace(uint id, uint price, uint durationInSeconds) external payable{
-        require(blockedWallets[msg.sender] == true, "Wallet was blocked");
+        require(blockedWallets[msg.sender] == false, "Wallet was blocked");
         uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         require(price >= _getPriceForAdvBySpace(advertisement), "Price is not correct");
