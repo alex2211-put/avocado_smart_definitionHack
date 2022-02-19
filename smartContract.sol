@@ -12,7 +12,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
     string private baseTokenURI;
-    uint private basePrice = 1*10 ** 18;
+    uint private basePrice = 10 ** 18;
     uint private constant commission = 10;
     address payable private owner_;
     Counters.Counter private _tokenIds;
