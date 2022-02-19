@@ -154,14 +154,13 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         return owner_.balance;
     }
 
-    function addAdvSpace(uint basePriceAdv, uint durationInSeconds, string calldata domain, uint height, uint width, string calldata description) external {
-        _mintSingleNFT();
+    function addAdvSpace(uint basePriceAdv, uint durationInSeconds, string calldata domain, uint height, uint width, string calldata name, string calldata description) external {
         advertisingSpace memory oneSpace = advertisingSpace(
             {
                 price: basePriceAdv, 
                 durationInSeconds: durationInSeconds, 
                 domain: domain, 
-                name: "empty space", 
+                name: name, 
                 owner: payable(msg.sender), 
                 id: _tokenIds.current(),
                 purchaseTime: block.timestamp,
