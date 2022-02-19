@@ -29,8 +29,11 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         uint purchaseTime;
         string html;
         uint height;
-        uint length;
+        uint width;
+        string description;
     }
+
+    mapping (uint => uint) numNFTinArr;
 
     advertisingSpace[] advertisingSpaces;
 
@@ -51,9 +54,11 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 html: "",
                 basePrice: basePrice,
                 height: 200,
-                length: 300
+                width: 300,
+                description: ""
             });
           advertisingSpaces.push(oneSpace);
+          numNFTinArr[oneSpace.NFTid] = i;
         }
     }
 
@@ -71,8 +76,8 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         return advertisingSpaces;
     }
 
-    function getPriceForAdv(uint NFTid) public view returns(uint price) {
-        uint numberInArr = _getNumberInArrByNFTid(NFTid);
+    function getPriceForAdv(uint id) public view returns(uint price) {
+        uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         if (block.timestamp > (advertisement.purchaseTime + advertisement.durationInSeconds)) {
             return advertisement.basePrice;
@@ -89,11 +94,12 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         return withoutCommission * (1 + commission / 100);
     }
 
-    function buyAdvertisementSpace(uint NFTid, uint price, uint durationInSeconds) external payable{
-        uint numberInArr = _getNumberInArrByNFTid(NFTid);
+    function buyAdvertisementSpace(uint id, uint price, uint durationInSeconds) external payable{
+        uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         require(price >= _getPriceForAdvBySpace(advertisement), "Price is not correct");
         require(msg.value >= price, "Ether value sent is not correct");
+        require(advertisement.owner != payable (msg.sender), "User is already own the NFT");
         owner_.transfer(msg.value);
         if (block.timestamp < (advertisement.purchaseTime + advertisement.durationInSeconds)) {
             returnMoney(advertisement);
@@ -104,13 +110,10 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         advertisement.purchaseTime = block.timestamp;
     }
 
-    function _getNumberInArrByNFTid(uint NFTid) internal view returns(uint numberInArr){
-        for (uint i = 0; i < advertisingSpaces.length; i++) {
-            if (advertisingSpaces[i].NFTid == NFTid) {
-                return i;
-            }
-        }
-        revert("No NFT with such id");
+    function _getNumberInArrById(uint id) internal view returns(uint numberInArr){
+        uint num = numNFTinArr[id];
+        require(num != 0, "No NFT with such id");
+        return num;
     }
 
     function returnMoney(advertisingSpace memory advertisement) private {
@@ -118,36 +121,36 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         advertisement.owner.transfer(moneyForReturn);
     }
 
-    function removeAdvFromUser(uint NFTid) external {
-        uint numberInArr = _getNumberInArrByNFTid(NFTid);
+    function removeAdvFromUser(uint id) external {
+        uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
         advertisement.owner = owner_;
         advertisement.name = "empty space";
         advertisement.html = "";
     }
 
-    function setHtml(uint NFTid, string memory html) external {
-        uint numberInArr = _getNumberInArrByNFTid(NFTid);
+    function setHtml(uint id, string calldata html) external {
+        uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
         require(advertisement.owner == msg.sender, "User does not own this NFT");
         advertisement.html = html;
     }
 
-    function getHtml(uint NFTid) external view returns(string memory html) {
-        uint numberInArr = _getNumberInArrByNFTid(NFTid);
+    function getHtml(uint id) external view returns(string memory html) {
+        uint numberInArr = _getNumberInArrById(id);
         return advertisingSpaces[uint(numberInArr)].html;
     }
 
-    function getXY(uint NFTid) external view returns(uint x, uint y){
-        uint numberInArr = _getNumberInArrByNFTid(NFTid);
-        return (advertisingSpaces[uint(numberInArr)].length, advertisingSpaces[uint(numberInArr)].height);
+    function getXY(uint id) external view returns(uint x, uint y){
+        uint numberInArr = _getNumberInArrById(id);
+        return (advertisingSpaces[uint(numberInArr)].width, advertisingSpaces[uint(numberInArr)].height);
     }
 
     function getBalance() external view returns(uint balance) {
         return owner_.balance;
     }
 
-    function addAdvSpace(uint basePriceAdv, uint durationInSeconds, string memory domain, uint height, uint length) external {
+    function addAdvSpace(uint basePriceAdv, uint durationInSeconds, string calldata domain, uint height, uint width, string calldata description) external {
         advertisingSpace memory oneSpace = advertisingSpace(
             {
                 price: basePriceAdv, 
@@ -160,8 +163,15 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 html: "",
                 basePrice: basePriceAdv,
                 height: height,
-                length: length
+                width: width,
+                description: description
             });
           advertisingSpaces.push(oneSpace);
+    }
+
+    function setDescription(uint id, string calldata description) external {
+        uint numberInArr = _getNumberInArrById(id);
+        advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
+        advertisement.description = description;
     }
 }
