@@ -71,7 +71,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
       _safeMint(msg.sender, newTokenID);
       _tokenIds.increment();
     }
-
+    
     function getAllNFT() external view returns(advertisingSpace[] memory) {
         return advertisingSpaces;
     }
@@ -167,6 +167,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 description: description
             });
           advertisingSpaces.push(oneSpace);
+          numNFTinArr[oneSpace.id] = advertisingSpaces.length - 1;
     }
 
     function setDescription(uint id, string calldata description) external {
