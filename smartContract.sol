@@ -31,11 +31,13 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         uint height;
         uint width;
         string description;
+        address payable creator;
     }
 
     mapping (uint => uint) numNFTinArr;
 
     advertisingSpace[] advertisingSpaces;
+    mapping (address => bool) blockedWallets;
 
     constructor(string memory baseURI) ERC721("NFT Collectible", "NFTC") onlyOwner {
         setBaseURI(baseURI);
@@ -46,7 +48,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
             {
                 price: basePrice, 
                 durationInSeconds: 0, 
-                domain: "google", 
+                domain: "google.com", 
                 name: "empty space", 
                 owner: owner_, 
                 id: _tokenIds.current(),
@@ -55,7 +57,8 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 basePrice: basePrice,
                 height: 200,
                 width: 300,
-                description: ""
+                description: "",
+                creator: owner_
             });
           advertisingSpaces.push(oneSpace);
           numNFTinArr[oneSpace.id] = i + 1;
@@ -95,11 +98,12 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
     }
 
     function buyAdvertisementSpace(uint id, uint price, uint durationInSeconds) external payable{
+        require(blockedWallets[msg.sender] == true, "Wallet was blocked");
         uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         require(price >= _getPriceForAdvBySpace(advertisement), "Price is not correct");
         require(msg.value >= price, "Ether value sent is not correct");
-        require(advertisement.owner != payable (msg.sender), "User is already own the NFT");
+        require(advertisement.owner != payable (msg.sender), "Wallet is already own the NFT");
         owner_.transfer(msg.value);
         if (block.timestamp < (advertisement.purchaseTime + advertisement.durationInSeconds)) {
             returnMoney(advertisement);
@@ -132,7 +136,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
     function setHtml(uint id, string calldata html) external {
         uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
-        require(advertisement.owner == msg.sender, "User does not own this NFT");
+        require(advertisement.owner == msg.sender, "Wallet does not own this NFT");
         advertisement.html = html;
     }
 
@@ -164,7 +168,8 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 basePrice: basePriceAdv,
                 height: height,
                 width: width,
-                description: description
+                description: description,
+                creator: payable(msg.sender)
             });
           advertisingSpaces.push(oneSpace);
           numNFTinArr[oneSpace.id] = advertisingSpaces.length;
@@ -174,5 +179,13 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
         advertisement.description = description;
+    }
+
+    function banUser(uint id) external {
+        uint numberInArr = _getNumberInArrById(id);
+        advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
+        require(msg.sender == advertisement.creator, "No access rights for this wallet");
+        require(advertisement.creator != advertisement.owner, "The wallet can not ban the creator");
+        blockedWallets[advertisement.owner] = true;
     }
 }
