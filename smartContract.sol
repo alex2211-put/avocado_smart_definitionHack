@@ -25,7 +25,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         string domain;
         string name;
         address payable owner;
-        uint NFTid;
+        uint id;
         uint purchaseTime;
         string html;
         uint height;
@@ -49,7 +49,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 domain: "google", 
                 name: "empty space", 
                 owner: owner_, 
-                NFTid: _tokenIds.current(),
+                id: _tokenIds.current(),
                 purchaseTime: block.timestamp,
                 html: "",
                 basePrice: basePrice,
@@ -58,7 +58,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 description: ""
             });
           advertisingSpaces.push(oneSpace);
-          numNFTinArr[oneSpace.NFTid] = i;
+          numNFTinArr[oneSpace.id] = i;
         }
     }
 
@@ -158,7 +158,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 domain: domain, 
                 name: "empty space", 
                 owner: payable(msg.sender), 
-                NFTid: _tokenIds.current(),
+                id: _tokenIds.current(),
                 purchaseTime: block.timestamp,
                 html: "",
                 basePrice: basePriceAdv,
