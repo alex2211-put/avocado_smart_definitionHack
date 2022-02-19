@@ -58,7 +58,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 description: ""
             });
           advertisingSpaces.push(oneSpace);
-          numNFTinArr[oneSpace.id] = i;
+          numNFTinArr[oneSpace.id] = i + 1;
         }
     }
 
@@ -71,7 +71,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
       _safeMint(msg.sender, newTokenID);
       _tokenIds.increment();
     }
-    
+
     function getAllNFT() external view returns(advertisingSpace[] memory) {
         return advertisingSpaces;
     }
@@ -113,7 +113,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
     function _getNumberInArrById(uint id) internal view returns(uint numberInArr){
         uint num = numNFTinArr[id];
         require(num != 0, "No NFT with such id");
-        return num;
+        return num - 1;
     }
 
     function returnMoney(advertisingSpace memory advertisement) private {
@@ -167,7 +167,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
                 description: description
             });
           advertisingSpaces.push(oneSpace);
-          numNFTinArr[oneSpace.id] = advertisingSpaces.length - 1;
+          numNFTinArr[oneSpace.id] = advertisingSpaces.length;
     }
 
     function setDescription(uint id, string calldata description) external {
