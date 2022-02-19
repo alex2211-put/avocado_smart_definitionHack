@@ -79,11 +79,15 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         return advertisingSpaces;
     }
 
-    function getPriceForAdv(uint id) public view returns(uint price) {
+    function getPriceForAdv(uint id) public returns(uint price) {
         uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         if (block.timestamp > (advertisement.purchaseTime + advertisement.durationInSeconds)) {
-            return advertisement.basePrice;
+            if (advertisement.owner != advertisement.creator) {
+                advertisement.owner = advertisement.creator;
+                advertisement.price = advertisement.basePrice;
+            }
+            return advertisement.price;
         }
         uint withoutCommission = (advertisement.price - advertisement.basePrice) *(1 - (block.timestamp - advertisement.purchaseTime) / advertisement.durationInSeconds) + advertisement.basePrice;
         return withoutCommission * (1 + commission / 100);
