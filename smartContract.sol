@@ -84,8 +84,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         if (block.timestamp > (advertisement.purchaseTime + advertisement.durationInSeconds)) {
             if (advertisement.owner != advertisement.creator) {
-                advertisement.owner = advertisement.creator;
-                advertisement.price = advertisement.basePrice;
+                _removeAdvFromUser(id);
             }
             return advertisement.price;
         }
@@ -129,7 +128,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         advertisement.owner.transfer(moneyForReturn);
     }
 
-    function removeAdvFromUser(uint id) external {
+    function _removeAdvFromUser(uint id) internal {
         uint numberInArr = _getNumberInArrById(id);
         advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
         advertisement.owner = owner_;
@@ -191,5 +190,6 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         require(msg.sender == advertisement.creator, "No access rights for this wallet");
         require(advertisement.creator != advertisement.owner, "The wallet can not ban the creator");
         blockedWallets[advertisement.owner] = true;
+        _removeAdvFromUser(id);
     }
 }
