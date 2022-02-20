@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
-contract AdvertisementContract is ERC721Enumerable, Ownable {
+contract AdvertisementContract is ERC721Enumerable {
 
     using SafeMath for uint256;
     using Counters for Counters.Counter;
@@ -38,9 +38,11 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
 
     advertisingSpace[] advertisingSpaces;
     mapping (address => bool) blockedWallets;
+    mapping (address => bool) blockedSpaceOwners;
+    mapping (address => uint[]) spacesByCreators;
 
-    constructor(string memory baseURI) ERC721("NFT Collectible", "NFTC") onlyOwner {
-        setBaseURI(baseURI);
+    constructor(string memory baseURI) ERC721("NFT Collectible", "NFTC") {
+        baseTokenURI = baseURI;
         owner_ = payable(msg.sender);
         for (uint i = 0; i < baseNumberNFT; i++) {
           _mintSingleNFT();
@@ -62,11 +64,8 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
             });
           advertisingSpaces.push(oneSpace);
           numNFTinArr[oneSpace.id] = i + 1;
+          spacesByCreators[owner_].push(oneSpace.id);
         }
-    }
-
-    function setBaseURI(string memory _baseTokenURI) public onlyOwner {
-        baseTokenURI = _baseTokenURI;
     }
 
     function _mintSingleNFT() private {
@@ -103,7 +102,6 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         uint durationInSeconds = durationInDays * 24 * 3600;
         require(msg.value >= price * durationInDays, "Ether value sent is not correct");
         require(advertisement.owner != payable (msg.sender), "Wallet is already own the NFT");
-        owner_.transfer(msg.value);
         if (block.timestamp < (advertisement.purchaseTime + advertisement.durationInSeconds)) {
             returnMoney(advertisement);
         }
@@ -173,6 +171,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
             });
           advertisingSpaces.push(oneSpace);
           numNFTinArr[oneSpace.id] = advertisingSpaces.length;
+          spacesByCreators[payable(msg.sender)].push(oneSpace.id);
     }
 
     function setDescription(uint id, string calldata description) external {
@@ -192,4 +191,17 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         }
         _removeAdvFromUser(id);
     }
+
+    function banSpaceOwners(uint id) external {
+        uint numberInArr = _getNumberInArrById(id);
+        advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
+        require(msg.sender == advertisement.owner, "No access rights for this wallet");
+        require(advertisement.creator != advertisement.owner, "The wallet can not ban the itself");
+        blockedSpaceOwners[advertisement.owner] = true;
+        if (block.timestamp < (advertisement.purchaseTime + advertisement.durationInSeconds)) {
+            returnMoney(advertisement);
+        }
+    }
+
+
 }
