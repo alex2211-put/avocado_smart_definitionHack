@@ -103,6 +103,7 @@ contract AdvertisementContract is ERC721Enumerable {
         require(msg.value >= price * durationInDays, "Ether value sent is not correct");
         require(advertisement.owner != payable (msg.sender), "Wallet is already own the NFT");
         if (block.timestamp < (advertisement.purchaseTime + advertisement.durationInSeconds)) {
+            require(msg.value > advertisement.price * durationInDays, "Ether value sent is not correct");
             returnMoney(advertisement);
         }
         advertisement.price = price;
@@ -202,6 +203,5 @@ contract AdvertisementContract is ERC721Enumerable {
             returnMoney(advertisement);
         }
     }
-
 
 }
