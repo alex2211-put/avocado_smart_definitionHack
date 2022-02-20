@@ -177,13 +177,13 @@ contract AdvertisementContract is ERC721Enumerable {
 
     function setDescription(uint id, string calldata description) external {
         uint numberInArr = _getNumberInArrById(id);
-        advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
+        advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         advertisement.description = description;
     }
 
     function banUser(uint id) external {
         uint numberInArr = _getNumberInArrById(id);
-        advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
+        advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
         require(msg.sender == advertisement.creator, "No access rights for this wallet");
         require(advertisement.creator != advertisement.owner, "The wallet can not ban the creator");
         blockedWallets[advertisement.owner] = true;
@@ -201,6 +201,10 @@ contract AdvertisementContract is ERC721Enumerable {
         blockedSpaceOwners[advertisement.owner] = true;
         if (block.timestamp < (advertisement.purchaseTime + advertisement.durationInSeconds)) {
             returnMoney(advertisement);
+        }
+        for (uint i = 0; i < spacesByCreators[advertisement.creator].length; i++) {
+            advertisingSpaces[spacesByCreators[advertisement.creator][i]] = advertisingSpaces[advertisingSpaces.length - 1];
+            advertisingSpaces.pop();
         }
     }
 
