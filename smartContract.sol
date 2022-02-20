@@ -138,16 +138,6 @@ contract AdvertisementContract is ERC721Enumerable {
         advertisement.html = html;
     }
 
-    function getHtml(uint id) external view returns(string memory html) {
-        uint numberInArr = _getNumberInArrById(id);
-        return advertisingSpaces[uint(numberInArr)].html;
-    }
-
-    function getXY(uint id) external view returns(uint x, uint y){
-        uint numberInArr = _getNumberInArrById(id);
-        return (advertisingSpaces[uint(numberInArr)].width, advertisingSpaces[uint(numberInArr)].height);
-    }
-
     function getBalance() external view returns(uint balance) {
         return owner_.balance;
     }
@@ -173,12 +163,6 @@ contract AdvertisementContract is ERC721Enumerable {
           advertisingSpaces.push(oneSpace);
           numNFTinArr[oneSpace.id] = advertisingSpaces.length;
           spacesByCreators[payable(msg.sender)].push(oneSpace.id);
-    }
-
-    function setDescription(uint id, string calldata description) external {
-        uint numberInArr = _getNumberInArrById(id);
-        advertisingSpace storage advertisement = advertisingSpaces[numberInArr];
-        advertisement.description = description;
     }
 
     function banUser(uint id) external {
@@ -207,5 +191,4 @@ contract AdvertisementContract is ERC721Enumerable {
             advertisingSpaces.pop();
         }
     }
-
 }
