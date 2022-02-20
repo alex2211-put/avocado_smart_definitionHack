@@ -138,10 +138,6 @@ contract AdvertisementContract is ERC721Enumerable {
         advertisement.html = html;
     }
 
-    function getBalance() external view returns(uint balance) {
-        return owner_.balance;
-    }
-
     function addAdvSpace(uint basePriceAdv, string calldata domain, uint height, uint width, string calldata name, string calldata description) external {
             _mintSingleNFT();
             advertisingSpace memory oneSpace = advertisingSpace(
@@ -176,20 +172,4 @@ contract AdvertisementContract is ERC721Enumerable {
         }
         _removeAdvFromUser(id);
     }
-
-    function banSpaceOwners(uint id) external {
-        uint numberInArr = _getNumberInArrById(id);
-        advertisingSpace storage advertisement = advertisingSpaces[uint(numberInArr)];
-        require(msg.sender == advertisement.owner, "No access rights for this wallet");
-        require(advertisement.creator != advertisement.owner, "The wallet can not ban the itself");
-        blockedSpaceOwners[advertisement.owner] = true;
-        if (block.timestamp < (advertisement.purchaseTime + advertisement.durationInSeconds)) {
-            returnMoney(advertisement);
-        }
-        for (uint i = 0; i < spacesByCreators[advertisement.creator].length; i++) {
-            advertisingSpaces[spacesByCreators[advertisement.creator][i]] = advertisingSpaces[advertisingSpaces.length - 1];
-            advertisingSpaces.pop();
-        }
-    }
-
 }
