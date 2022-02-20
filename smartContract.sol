@@ -92,8 +92,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
         if (block.timestamp > (advertisement.purchaseTime + advertisement.durationInSeconds)) {
             return advertisement.basePrice;
         }
-        uint withoutCommission = (advertisement.price - advertisement.basePrice) *(1 - (block.timestamp - advertisement.purchaseTime) / advertisement.durationInSeconds) + advertisement.basePrice;
-        return withoutCommission;
+        return advertisement.price;
     }
 
     function buyAdvertisementSpace(uint id, uint price, uint durationInDays) external payable{
@@ -121,7 +120,7 @@ contract AdvertisementContract is ERC721Enumerable, Ownable {
     }
 
     function returnMoney(advertisingSpace memory advertisement) private {
-        uint moneyForReturn = (advertisement.price - advertisement.basePrice) *(1 - (block.timestamp - advertisement.purchaseTime) / advertisement.durationInSeconds);
+        uint moneyForReturn = advertisement.price * (1 - (block.timestamp - advertisement.purchaseTime) / advertisement.durationInSeconds) * advertisement.durationInSeconds / (24 * 3600);
         advertisement.owner.transfer(moneyForReturn);
     }
 
