@@ -1,4 +1,4 @@
-# Decentralized Advertising platform
+# Decentralised Advertising platform
 
 Projects for the [hackathon](https://definitionhack.io/)
 
